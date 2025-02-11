@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
@@ -9,21 +9,24 @@ class User(AbstractUser):
     is_cliente = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
 
-    groups = models.ManyToManyField(Group, related_name="users_custom_groups")
-    user_permissions = models.ManyToManyField(Permission, related_name="users_custom_permissions")
-
     class Meta:
         app_label = "users"
         
     def __str__(self):
         return self.username
+
 class Client(models.Model):
     """ Model to represent a client."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="client")
     direction = models.CharField(max_length=255, blank=True)
     preferred_language = models.CharField(
-        max_length=10, choices=[("es", "Spanish"), ("en", "English")], default="es"
+        max_length=10, 
+        choices=[
+            ("es", "Spanish"), 
+            ("en", "English")
+            ], 
+        default="es"
     )
 
     def __str__(self):
@@ -32,7 +35,7 @@ class Client(models.Model):
 
 class Employee(models.Model):
     """ Model to represent an employee"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee")
     charge = models.CharField(
         max_length=10,
         choices=[
@@ -40,5 +43,6 @@ class Employee(models.Model):
             ("seller", "Seller"),
         ],
     )
+    
     def __str__(self):
         return f"{self.user.username} - {self.charge}"

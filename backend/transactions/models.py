@@ -16,12 +16,6 @@ class Transaction(models.Model):
     transaction_currency = models.CharField(max_length=10,blank=True, null=True)
     transaction_method = models.CharField(max_length=100, blank=True, null=True)
     transaction_response = models.TextField(blank=True, null=True)
-    
-    payment_status = models.CharField(max_length=20, choices=[
-        ("pending", "Pending"),
-        ("completed", "Completed"),
-        ("failed", "Failed"),
-    ], blank=True, null=True)
     shipping_status = models.CharField(max_length=20, choices=[
         ("pending", "Pending"),
         ("in_transit", "In Transit"),

@@ -15,7 +15,7 @@ class SalesReport(models.Model):
         today = now().date()
         transactions = Transaction.objects.filter(transaction_date__date=today)
         total_orders = transactions.count()
-        total_revenue = sum(transactions.order.product.price * transactions.order.quantity for transaction in transactions)
+        total_revenue = sum(transactions.order.products.aggregate(models.Sum('price'))['price__sum'] for transaction in transactions if transaction.order)
         total_completed_orders = transactions.filter(payment_status="completed", shipping_status = "delivered").count()
         
         report, created = cls.objects.get_or_create(
