@@ -6,7 +6,7 @@ class User(AbstractUser):
     """ Extend Django user model to add custom fields."""
     
     phone_number = models.CharField(max_length=15, blank=True)
-    is_cliente = models.BooleanField(default=False)
+    is_client = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
 
     class Meta:
