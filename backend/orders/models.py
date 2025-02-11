@@ -14,6 +14,9 @@ class Order(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATES, default="pending")
+    shipping_direction = models.TextField()
     
     def __str__(self):
-        return f"(self.client) -(self.product) - (self.quantity)"
+        return f" Order {self.id} {self.client.user.username} -{self.product} - {self.quantity}"
