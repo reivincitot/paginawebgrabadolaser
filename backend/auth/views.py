@@ -71,7 +71,7 @@ class PasswordResetRequestView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializers = self.get_serializer(data=request.data)
         serializers.is_valid(raise_exception=True)
-        email = serializers.validate_data['email']
+        email = serializers.validated_data['email']
         user = User.objects.get(email=email)
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
@@ -94,7 +94,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         serializer =self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         uidb64 = serializer.validated_data['uidb64']
-        token = serializer.validate_data['token']
+        token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -116,8 +116,8 @@ class EmailConfirmationView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        uidb64 = serializer.validate_data['uidb64']
-        token = serializer.validate_data['token']
+        uidb64 = serializer.validated_data['uidb64']
+        token = serializer.validated_data['token']
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -126,6 +126,9 @@ class EmailConfirmationView(generics.GenericAPIView):
         
         token_generator = PasswordResetTokenGenerator()
         if not token_generator.check_token(user, token):
-            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid token or expired'}, status=status.HTTP_400_BAD_REQUEST)
+        user.is_active=True
         user.save()
+        
         return Response({'message': 'Email confirmed successfully.'}, status=status.HTTP_200_OK)
+    

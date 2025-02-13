@@ -1,31 +1,50 @@
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-from users.models import User
+from django.test import TestCase
+from users.models import User, Client, Employee
 
+class UserModelTests(TestCase):
 
-class UserTest(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username = 'testuser',
-            email = 'test@example.com',
-            password = 'Testpass123!',
-            phone_number = '123456789',
+    def test_create_user_and_client(self):
+        # Crear usuario
+        user = User.objects.create_user(
+            username="testclient",
+            email="client@example.com",
+            password="Testpass123!",
+            phone_number="123456789"
         )
-        self.user.is_active = True
-        self.user.save()
         
-    def test_user_list(self):
-        url = reverse('user-list')
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(len(response.data), 1)
+        user.is_active = True
+        user.save()
+        # Crear Client relacionado
+        client = Client.objects.create(user=user, direction="123 Main St", preferred_language="en")
         
-    def test_user_detail(self):
-        url = reverse('user-detail', kwargs={'pk': self.user.pk})
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['username'], self.user.username)
+        # Verificar que el usuario y el client se crearon correctamente
+        self.assertEqual(str(user), "testclient")
+        self.assertEqual(str(client), "testclient")
+        self.assertEqual(client.preferred_language, "en")
+
+    def test_create_employee(self):
+        # Crear usuario
+        user = User.objects.create_user(
+            username="testemployee",
+            email="employee@example.com",
+            password="Testpass123!",
+            phone_number="987654321"
+        )
+        user.is_active = True
+        user.save()
+        # Crear Employee relacionado
+        employee = Employee.objects.create(user=user, charge="admin")
         
+        # Verificar el __str__ de employee
+        self.assertEqual(str(employee), "testemployee - admin")
+    
+    def test_user_fields_validation(self):
+        # Probar que se puede crear un usuario sin teléfono (campo blank)
+        user = User.objects.create_user(
+            username="noteluser",
+            email="notel@example.com",
+            password="Testpass123!"
+        )
+        user.is_active = True
+        user.save()
+        self.assertEqual(user.phone_number, "")

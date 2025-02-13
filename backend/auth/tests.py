@@ -7,18 +7,27 @@ from users.models import User
 class AuthTests(APITestCase):
     
     def test_registration(self):
-        url = reverse('auth-register')
+        url = reverse('auth_register')
         data = {
             'username': 'testuser',
             'email': 'test@example.com',
             'phone_number': '123456789',
             'password': 'Testpass123!',
-            'password': 'Testpass123!'
+            'password2': 'Testpass123!'
         }
         response = self.client.post(url, data, format='json')
+        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.count(),1)
-        user = User.objects.get(username='testuser')
+        
+        if response.status_code == status.HTTP_201_CREATED:
+            self.assertEqual(User.objects.count(),1)
+            user = User.objects.get(username='testuser')
+            self.assertFalse(user.is_active)
+            
+        else:
+            print(response.content)
+            self.assertEqual(User.objects.count(), 0)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_login(self):
         user = User.objects.create_user(username='testuser', email='test@example.com', password='Testpass123!')

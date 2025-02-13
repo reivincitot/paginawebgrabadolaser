@@ -1,7 +1,11 @@
 from django.db import models
 from django.utils.timezone import now
 from transactions.models import Transaction
+from django.utils import timezone
 
+from django.db import models
+from django.utils.timezone import now
+from transactions.models import Transaction
 
 class SalesReport(models.Model):
     date = models.DateField(auto_now_add=True)
@@ -11,12 +15,20 @@ class SalesReport(models.Model):
     
     @classmethod
     def generate_daily_report(cls):
-        """ Create a daily sales report based on the orders made on that day"""
+        """Create a daily sales report based on the orders made on that day"""
         today = now().date()
+        # Filtrar transacciones cuya fecha sea la de hoy
         transactions = Transaction.objects.filter(transaction_date__date=today)
         total_orders = transactions.count()
-        total_revenue = sum(transactions.order.products.aggregate(models.Sum('price'))['price__sum'] for transaction in transactions if transaction.order)
-        total_completed_orders = transactions.filter(payment_status="completed", shipping_status = "delivered").count()
+        # Ahora sumamos, para cada transacción, el total de la orden basado en sus ítems.
+        total_revenue = sum(
+            sum(item.product.price * item.quantity for item in transaction.order.items.all())
+            for transaction in transactions if transaction.order
+        )
+        # Contar las órdenes completadas (según payment_status y shipping_status)
+        total_completed_orders = transactions.filter(
+            payment_status="completed", shipping_status="delivered"
+        ).count()
         
         report, created = cls.objects.get_or_create(
             date=today,
@@ -30,6 +42,8 @@ class SalesReport(models.Model):
     
     def __str__(self):
         return f"Sales Report for {self.date}"
+
+
     
 class PaymentReport(models.Model):
     date = models.DateField(auto_now_add=True)
@@ -39,11 +53,13 @@ class PaymentReport(models.Model):
     
     @classmethod
     def generate_daily_report(cls):
-        """ Create a daily payment report based on the payments made on that day"""
+        """Create a daily payment report based on the payments made on that day"""
         today = now().date()
-        transactions = Transaction.objects.filter(date__date=today)
+        transactions = Transaction.objects.filter(transaction_date__date=today)
         total_payments = transactions.count()
-        total_amount = sum(transaction.transaction_amount for transaction in transactions if transaction.transaction_amount)
+        total_amount = sum(
+            transaction.transaction_amount or 0 for transaction in transactions
+        )
         failed_payments = transactions.filter(payment_status="failed").count()
         
         report, created = cls.objects.get_or_create(
@@ -59,30 +75,33 @@ class PaymentReport(models.Model):
     def __str__(self):
         return f"Payment Report for {self.date}"
 
+
 class ShippingReport(models.Model):
-    date = models.DateField(default=now)
+    date = models.DateField(default=timezone.now)
     total_shipments = models.IntegerField(default=0)
     delivered_shipments = models.IntegerField(default=0)
     pending_shipments = models.IntegerField(default=0)
     
     @classmethod
     def generate_daily_report(cls):
-        """ Create a daily shipping report based on the shipments made on that day"""
-        today = now().date()
+        """Create a daily sales report based on the orders made on that day"""
+        today = timezone.now().date()
         transactions = Transaction.objects.filter(transaction_date__date=today)
         total_shipments = transactions.count()
-        delivered_shipments = transactions.filter(shipping_status="delivered").count()
-        pending_shipments = transactions.filter(shipping_status="pending").count()
+        
+        # Count the items in the filtered QuerySets
+        delivered_shipments = transactions.filter(shipping_status='delivered').count()
+        pending_shipmentes = transactions.filter(shipping_status = 'pending').count()
         
         report, created = cls.objects.get_or_create(
-            date=today,
+            date= today,
             defaults={
                 'total_shipments': total_shipments,
                 'delivered_shipments': delivered_shipments,
-                'pending_shipments': pending_shipments,
+                'pending_shipments': pending_shipmentes,
             }
         )
         return report
     
     def __str__(self):
-        return f"Shipping Report - {self.date}"
+        return f'Shipping Report for {self.date}'

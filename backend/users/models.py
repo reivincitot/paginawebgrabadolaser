@@ -20,6 +20,7 @@ class Client(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="client")
     direction = models.CharField(max_length=255, blank=True)
+    is_client = models.BooleanField(default=False)
     preferred_language = models.CharField(
         max_length=10, 
         choices=[
@@ -27,6 +28,7 @@ class Client(models.Model):
             ("en", "English")
             ], 
         default="es"
+        
     )
 
     def __str__(self):

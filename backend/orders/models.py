@@ -18,11 +18,12 @@ class Order(models.Model):
     shipping_direction = models.TextField()
     
     def total_price(self):
-        return sum(item.product.price * item.quantity for item in self.item.all())
+        return sum(item.product.price * item.quantity for item in self.items.all())
     
     def __str__(self):
-        return f" Order {self.id} {self.client.user.username} -{self.product} - {self.quantity}"
-    
+        product_names = ", ".join([item.product.name for item in self.items.all()])
+        return f"Order {self.id} by {self.client.user.username}: {product_names}"
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Products, on_delete=models.CASCADE)

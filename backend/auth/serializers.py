@@ -9,7 +9,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        field = ('id', 'username', 'email', 'phone_number', 'password', 'password2'
+        fields = ('id', 'username', 'email', 'phone_number', 'password', 'password2'
                 )
     
     def validate(self, data):
@@ -23,13 +23,19 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             phone_number=validated_data.get('phone_number',''),
-            is_cliente=True,
+            is_client=True,
             is_active=False,
         )
         
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
+    def validate_email(self, value):
+        """Verify if the email already exist in the database"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email already exist.")
+        return value
     
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -38,7 +44,7 @@ class LoginSerializer(serializers.Serializer):
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
     
-    def validate_email(self,value):
+    def validated_email(self,value):
         if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError('No user is registered with this email address. ')
         return value
