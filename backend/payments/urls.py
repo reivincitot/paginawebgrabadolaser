@@ -5,6 +5,6 @@ from shipping.views import ShippingViewSet
 router = DefaultRouter()
 router.register(r'shippings', ShippingViewSet,basename='shipping')
 
-urlspatterns = [
+urlpatterns = [
     path('', include(router.urls)),
 ]
