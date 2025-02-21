@@ -1,126 +1,102 @@
-// src/pages/Checkout.jsx
-import React, { useState } from 'react';
-import Header from '../components/Header';
+// src/pages/UserProfile.jsx
+import React, { useEffect, useState } from 'react';
+import Layout from '../components/Layout';
 import axiosInstance from '../services/AxiosInstance';
-import { useNavigate } from 'react-router-dom';
-import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 
-const Checkout = () => {
-  const [shippingInfo, setShippingInfo] = useState({
-    fullName: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: '',
-  });
-  const [loading, setLoading] = useState(false);
+const UserProfile = () => {
+  const [userData, setUserData] = useState(null);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setShippingInfo({
-      ...shippingInfo,
-      [e.target.name]: e.target.value,
-    });
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userResponse = await axiosInstance.get('users/profile/');
+        setUserData(userResponse.data);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError("Failed to load user data.");
+      }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMessage('');
-    setLoading(true);
-    try {
-      // Supongamos que tienes un endpoint para crear una orden de checkout, por ejemplo: orders/checkout/
-      const response = await axiosInstance.post('orders/checkout/', shippingInfo);
-      setSuccessMessage("Order created successfully!");
-      // Una vez creada la orden, redirige al usuario (por ejemplo, a la página de pago o confirmación)
-      navigate('/order-confirmation'); // Ajusta esta ruta según tu flujo
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setError("Failed to process your checkout. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchOrderHistory = async () => {
+      try {
+        const ordersResponse = await axiosInstance.get('orders/');
+        setOrderHistory(ordersResponse.data);
+      } catch (err) {
+        console.error("Error fetching order history:", err);
+        setError("Failed to load order history.");
+      }
+    };
+
+    Promise.all([fetchUserData(), fetchOrderHistory()]).then(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-4 text-center">
+          <p>Loading profile...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-4 text-center">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <div>
-      <Header />
+    <Layout>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
-        <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-          <div className="mb-4">
-            <label className="block text-gray-700">Full Name</label>
-            <input
-              type="text"
-              name="fullName"
-              value={shippingInfo.fullName}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
+        <h1 className="text-3xl font-bold mb-6">User Profile</h1>
+        {userData ? (
+          <div className="bg-white p-6 rounded shadow mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Personal Information</h2>
+            <p><strong>Username:</strong> {userData.username || "Not provided"}</p>
+            <p><strong>Email:</strong> {userData.email || "Not provided"}</p>
+            <p><strong>Phone:</strong> {userData.phone_number || "Not provided"}</p>
+            <p>
+              <Link to="/profile/edit" className="text-blue-500 underline">
+                Complete/Update your profile
+              </Link>
+            </p>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={shippingInfo.address}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
+        ) : (
+          <div className="text-center">
+            <p>No user data available.</p>
+            <Link to="/register" className="text-blue-500 underline">
+              Register here
+            </Link>
           </div>
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700">City</label>
-              <input
-                type="text"
-                name="city"
-                value={shippingInfo.city}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700">Postal Code</label>
-              <input
-                type="text"
-                name="postalCode"
-                value={shippingInfo.postalCode}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Country</label>
-            <input
-              type="text"
-              name="country"
-              value={shippingInfo.country}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600 transition-colors"
-            disabled={loading}
-          >
-            {loading ? "Processing..." : "Confirm Order & Pay"}
-          </button>
-        </form>
+        )}
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-2xl font-semibold mb-2">Order History</h2>
+          {orderHistory.length > 0 ? (
+            <ul className="divide-y">
+              {orderHistory.map(order => (
+                <li key={order.id} className="py-2">
+                  <p><strong>Order ID:</strong> {order.id}</p>
+                  <p><strong>Status:</strong> {order.status}</p>
+                  <p><strong>Date:</strong> {order.date}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No orders found.</p>
+          )}
+        </div>
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 
-export default Checkout;
+export default UserProfile;

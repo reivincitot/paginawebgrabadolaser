@@ -1,8 +1,8 @@
+// src/pages/Catalog.jsx
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
+import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../services/productServices';
-import Footer from '../components/Footer';
 
 const Catalog = () => {
   const [products, setProducts] = useState([]);
@@ -25,41 +25,23 @@ const Catalog = () => {
     fetchProducts();
   }, []);
 
-  if (loading) {
-    return (
-      <div>
-        <Header />
-        <div className="container mx-auto p-4 text-center">
-          <p>Loading products...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div>
-        <Header />
-        <div className="container mx-auto p-4 text-red-500 text-center">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <Header />
+    <Layout>
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-6">Product Catalog</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-gray-700">Loading products...</div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

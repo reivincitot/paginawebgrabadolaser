@@ -1,9 +1,8 @@
 // src/pages/Checkout.jsx
 import React, { useState } from 'react';
-import Header from '../components/Header';
+import Layout from '../components/Layout';
 import axiosInstance from '../services/AxiosInstance';
 import { useNavigate } from 'react-router-dom';
-import Footer from '../components/Footer';
 
 const Checkout = () => {
   const [shippingInfo, setShippingInfo] = useState({
@@ -31,11 +30,9 @@ const Checkout = () => {
     setSuccessMessage('');
     setLoading(true);
     try {
-      // Supongamos que tienes un endpoint para crear una orden de checkout, por ejemplo: orders/checkout/
       const response = await axiosInstance.post('orders/checkout/', shippingInfo);
       setSuccessMessage("Order created successfully!");
-      // Una vez creada la orden, redirige al usuario (por ejemplo, a la página de pago o confirmación)
-      navigate('/order-confirmation'); // Ajusta esta ruta según tu flujo
+      navigate('/order-confirmation'); // Ajusta la ruta según tu flujo
     } catch (err) {
       console.error("Checkout error:", err);
       setError("Failed to process your checkout. Please try again.");
@@ -45,8 +42,7 @@ const Checkout = () => {
   };
 
   return (
-    <div>
-      <Header />
+    <Layout>
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>
         {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -118,8 +114,7 @@ const Checkout = () => {
           </button>
         </form>
       </div>
-      <Footer/>
-    </div>
+    </Layout>
   );
 };
 

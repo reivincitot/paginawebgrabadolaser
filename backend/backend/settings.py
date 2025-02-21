@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
@@ -12,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = 'D0RQu2gMkTo1FeqlLhhcl-2viwD3A4E4TI3zFNV0690-xdoLioLMnY7mSMwZLB2MGnQ'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,21 +37,33 @@ INSTALLED_APPS = [
     "shipping",
     "payments",
     "reports",
-    "transactions",    
+    "transactions",
+    "corsheaders",
+    "rest_framework.authtoken",   
 ]
 REST_FRAMEWORK = {
-    'DEFAUL_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -134,7 +147,17 @@ AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:5173",
+#    "http://127.0.0.1:5173",
+#]
+
+CORS_ALLOWED_CREDENTIALS = True
+
+CORS_ALLOW_ALL_ORIGINS = True

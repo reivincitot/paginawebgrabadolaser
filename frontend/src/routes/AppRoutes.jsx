@@ -8,6 +8,9 @@ import Checkout from '../pages/Checkout';
 import Login from '../pages/Login';
 import UserProfile from '../pages/UserProfile';
 import Dashboard from '../pages/Dashboard';
+import Register from '../pages/Register';
+import ResetPassword from '../pages/ResetPassword';
+
 
 const AppRoutes = () => {
   return (
@@ -20,6 +23,8 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/register" element={<Register />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );

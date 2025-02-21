@@ -1,14 +1,14 @@
+// src/pages/Home.jsx
 import React, { useEffect, useState } from 'react';
-import Header from '../components/Header';
+import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../services/productServices';
-import Footer from '../components/Footer';
-
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
@@ -17,16 +17,16 @@ const Home = () => {
         setFeaturedProducts(data.slice(0, 4));
       } catch (error) {
         console.error("Error fetching featured products:", error);
+        setError("Failed to fetch featured products.");
       } finally {
         setLoading(false);
       }
     };
     fetchFeaturedProducts();
   }, []);
-  
+
   return (
-    <div>
-      <Header />
+    <Layout>
       {/* Sección Hero */}
       <section className="bg-gray-200 py-20">
         <div className="container mx-auto text-center">
@@ -47,6 +47,8 @@ const Home = () => {
           <h2 className="text-3xl font-bold mb-6 text-center">Featured Products</h2>
           {loading ? (
             <p className="text-center">Loading featured products...</p>
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {featuredProducts.map(product => (
@@ -56,8 +58,7 @@ const Home = () => {
           )}
         </div>
       </section>
-      <Footer/>
-    </div>
+    </Layout>
   );
 };
 
