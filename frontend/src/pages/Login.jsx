@@ -31,13 +31,11 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    // Aquí iría la lógica para OAuth con Google (por ejemplo, redirigir a tu endpoint de OAuth)
-    window.location.href = 'http://127.0.0.1:8000/api/auth/google/';
+    window.location.href = 'http://localhost:8000/accounts/google/login/'; // 👈 URL correcta
   };
-
+  
   const handleMetaLogin = () => {
-    // Aquí iría la lógica para OAuth con Meta (Facebook)
-    window.location.href = 'http://127.0.0.1:8000/api/auth/meta/';
+    window.location.href = 'http://localhost:8000/accounts/facebook/login/'; // 👈 URL correcta
   };
 
   return (

@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
@@ -138,11 +140,12 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # django-allauth
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = ['email']
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 LOGIN_REDIRECT_URL = 'http://localhost:5173/'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'http://localhost:5173/'
 
@@ -155,8 +158,12 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+        'USER_FIELDS': ['email', 'first_name', 'last_name'],
     }
 }
+
+SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # CORS (Configuración para desarrollo)
 CORS_ALLOW_ALL_ORIGINS = True
@@ -164,4 +171,13 @@ CORS_ALLOWED_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+]
+
+LOCALE_PATH = [
+    BASE_DIR / 'locale',
+]
+
+LANGUAGES = [
+    ('es', 'Spanish'),
+    ('en', 'English'),
 ]

@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-02 01:26-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: .\auth\serializers.py:36
+msgid "Enter a valid email address."
+msgstr ""
+
+#: .\auth\serializers.py:40
+msgid "This email is already registered"
+msgstr ""
+
+#: .\auth\serializers.py:46 .\auth\serializers.py:110
+msgid "Passwords do not match"
+msgstr ""
+
+#: .\auth\serializers.py:50
+msgid "This phone number is already in use."
+msgstr ""
+
+#: .\auth\serializers.py:68
+msgid "This email already exists."
+msgstr ""
+
+#: .\auth\serializers.py:74
+msgid "Registered email address."
+msgstr ""
+
+#: .\auth\serializers.py:80
+msgid "Your account password."
+msgstr ""
+
+#: .\auth\serializers.py:85
+msgid "Enter your registered email"
+msgstr ""
+
+#: .\auth\serializers.py:90
+msgid "No account found with this email."
+msgstr ""
+
+#: .\auth\serializers.py:100
+msgid "New password"
+msgstr ""
+
+#: .\auth\serializers.py:105
+msgid "Repeat new password"
+msgstr ""

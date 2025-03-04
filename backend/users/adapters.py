@@ -1,19 +1,34 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.utils.text import slugify
-from .models import User
-from  rest_framework import serializers
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+
+User = get_user_model()
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
-    def populate_user(self, request, sociallogin, data):
-        email = data.get('email')
-        first_name = data.get('first_name', '')
-        last_name = data.get('last_name', '')
+    def save_user(self, request, sociallogin, form=None):
+        extra_data = sociallogin.account.extra_data
+        email = extra_data.get('email')
+        first_name = extra_data.get('given_name', '')
+        last_name = extra_data.get('family_name', '')
         
-        # Validate unique email
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("This email already exists.")
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                'first_name': first_name,
+                'last_name': last_name,
+                'is_client': True
+            }
+        )
         
-        #Generate uniques usernames
+        refresh = RefreshToken.for_user(user)
+        sociallogin.token = {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh)
+        }
         
-        
-        return super().populate_user(request, sociallogin, data)
+        sociallogin.user = user
+        return user
+    
+    def pre_social_login(self, request, sociallogin):
+        if sociallogin.user.is_client and not hasattr(sociallogin.user,'client'):
+            Client.objects.create(user=sociallogin.user)

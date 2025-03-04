@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axiosInstance from '../services/AxiosInstance';
-import countries from '../data/countries.json'; // Asegúrate de tener este archivo
+import countries from '../data/countries.json'; 
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -50,12 +50,12 @@ const Register = () => {
     }
   };
 
-  const handleGoogleRegister = () => {
-    window.location.href = 'http://127.0.0.1:8000/api/auth/google/';
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:8000/accounts/google/login/'; // 👈 URL correcta
   };
-
-  const handleMetaRegister = () => {
-    window.location.href = 'http://127.0.0.1:8000/api/auth/meta/';
+  
+  const handleMetaLogin = () => {
+    window.location.href = 'http://localhost:8000/accounts/facebook/login/'; // 👈 URL correcta
   };
 
   return (

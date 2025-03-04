@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from orders.models import Order, OrderItem
-from users.serializers import ClienteSerializer
+from users.serializers import ClientSerializer
 from products.serializers import ProductSerializer
 
 
@@ -12,7 +12,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
-    client = ClienteSerializer()
+    client = ClientSerializer()
     items = OrderItemSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
     
