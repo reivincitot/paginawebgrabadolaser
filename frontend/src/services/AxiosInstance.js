@@ -7,6 +7,15 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
-})
+});
+
+// Interceptor to add the token to the request
+axiosInstance.interceptors.request.use( config => {
+  const token = localStorage.getItem('accessToken');
+  if (token){
+    confirm.headers.Authorization = 'Bearer ${token}';
+  }
+  return config;
+});
 
 export default axiosInstance;

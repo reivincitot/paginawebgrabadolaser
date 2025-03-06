@@ -146,7 +146,9 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-LOGIN_REDIRECT_URL = 'http://localhost:5173/'
+LOGIN_REDIRECT_URL = 'http://localhost:5173/social-callback/'
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = 'http://localhost:5173/social-callback/'
+SOCIALACCOUNT_SIGNUP_REDIRECT_URL = 'http://localhost:5173/social-callback/'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'http://localhost:5173/'
 
 # Proveedores sociales

@@ -1,12 +1,13 @@
-// src/App.jsx
-import React from 'react';
 import AppRoutes from './routes/AppRoutes';
+import AuthProvider  from './context/AuthContext';
 
 function App() {
   return (
-    <div>
-      <AppRoutes />
-    </div>
+    <AuthProvider>
+      <div>
+        <AppRoutes />
+      </div>
+    </AuthProvider>
   );
 }
 

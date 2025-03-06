@@ -50,12 +50,12 @@ const Register = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8000/accounts/google/login/'; // 👈 URL correcta
+  const handleGoogleRegister = () => {
+    window.location.href = 'http://localhost:8000/accounts/google/login/';
   };
   
-  const handleMetaLogin = () => {
-    window.location.href = 'http://localhost:8000/accounts/facebook/login/'; // 👈 URL correcta
+  const handleMetaRegister = () => {
+    window.location.href = 'http://localhost:8000/accounts/facebook/login/';
   };
 
   return (
