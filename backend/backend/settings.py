@@ -8,7 +8,7 @@ load_dotenv()
 
 # Configuración básica de Django
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'D0RQu2gMkTo1FeqlLhhcl-2viwD3A4E4TI3zFNV0690-xdoLioLMnY7mSMwZLB2MGnQ'
+SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 ALLOWED_HOSTS = []
 
