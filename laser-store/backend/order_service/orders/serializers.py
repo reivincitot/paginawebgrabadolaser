@@ -6,7 +6,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = '__all__'
         
-class OrderSerializer(serializer.ModelSerializer):    
+class OrderSerializer(serializers.ModelSerializer):    
     items = OrderItemSerializer(many=True, read_only=True)
     
     class Meta:
