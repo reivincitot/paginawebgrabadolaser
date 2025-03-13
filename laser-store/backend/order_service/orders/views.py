@@ -4,7 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
-
+from .permissions import IsOwnerOrAdmin
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -59,5 +59,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 class OrderItemViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrAdmin]
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
