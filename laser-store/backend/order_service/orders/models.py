@@ -1,21 +1,31 @@
 from django.db import models
-
+from django.conf import settings
 
 class Order(models.Model):
-    user_id = models.IntegerField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=50, default='pending')
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('refunded', 'Refunded'),
+    ]
     
-    def __str__(self):
-        return f'Order {self.id} by User {self.user_id}'
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='orders')
+    total= models.DecimalField(max_digits=12,decimal_places=2)
+    commission = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    payment_intent_id = models.CharField(max_length=255, blank=True)
+    metadata = models.JSONField(default=dict)
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product_id = models.IntegerField()
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f'Item {self.product_id} in Order {self.order.id}'
+    product_id = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField()
+    unite_price = models.DecimalField(max_digits=10, decimal_places=2)
+    commission_rate= models.DecimalField(max_digits=5, decimal_places=2)
+    
+    class Meta:
+        unique_together = ('order', 'product_id')
         

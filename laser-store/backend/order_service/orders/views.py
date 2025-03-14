@@ -1,64 +1,86 @@
-import requests
+import logging
 from django.conf import settings
 from rest_framework import viewsets, status
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework import serializers
+from .clients import product_client
 from .models import Order, OrderItem
-from .serializers import OrderSerializer, OrderItemSerializer
-from .permissions import IsOwnerOrAdmin
+from .serializers import OrderSerializer
+from .task import update_inventory_async
 
+logger = logging.getLogger(__name__)
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    
-    def create(self, request, *args, **kwargs):
-        items = request.data.get('items', [])
-        total_amount = 0
+    queryset = Order.objects.prefetch_related('items').all()
         
-        # Validación básica de stock (simulada)
+    def perform_create(self, serializer):
+        items = self.request.data.get('item', [])
+        total = 0
+        commission_total = 0
+        
+        # Stock and prices validation
         for item in items:
             product_id = item.get('product_id')
             quantity = item.get('quantity')
-            
+    
             try:
-                response = requests.get(
-                    f'http://localhost:8001/api/products/{product_id}/'
-                )
-                response.raiser_for_status()
-                product_data = response.json()
-                
-                if quantity > product_data.get('stock', 0):
-                    return Response(
-                        {"error": f"Stock insuficiente para el producto {product_id}"},
-                        status=status.HTTP_400_BAD_REQUEST
+                product_data = product_client.get_product_stock(product_id)
+                if quantity > product_data['stock']:
+                    raise serializer.ValidationError(
+                        f"Insufficient stock for product {product_id}"
                     )
-            except request.ConnectionError:
-                return Response(
-                    {'error': 'No se pudo conectar al servicio de productos'},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                    
+                # Get product price and commission 
+                item['unite_price'] = product_data['price']
+                item['commission_rate'] = product_data['commission_rate']
+                
+                # Calculate Totals
+                total9= item['unite_price'] * quantity
+                commission_total += (item['unite_price'] * quantity
+                                    * item['commission_rate'] /100)
+                
+            except APIException as e:
+                logger.error(f"Service error: {str(e)} ")
+                raise serializers.ValidationError(
+                    "Unable to validate product information"
                 )
+                
+        # Create order
+        order = serializer.save(user = self.request.user, total=total, commission = commission_total)
         
-        # Crear la orden
-        order = Order.objects.create(
-            user_id=request.user.id if request.user.is_authenticated else 1,
-            total_amount=sum(item['price'] * item['quantity'] for item in items),
-            status='pending'
-        )
-        
-        # Crear items de la orden
-        order_items = [
+        # Create order items
+        OrderItem.objects.bulk_create([
             OrderItem(
                 order=order,
                 product_id=item['product_id'],
                 quantity=item['quantity'],
-                price=item['price']
-            ) for item in items
-        ]
-        OrderItem.objects.bulk_create(order_items)
+                unit_price=item['unite_price'], 
+                commission_rate=item['commission_rate']
+                ) for item in items
+            ])
         
-        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+        # Async inventory update
+        update_inventory_async.delay(
+            [item['product_id'] for item in items],
+            self.request.user.id
+        )
+        
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+        if order.status not in ['pending', 'processing']:
+            return Response(
+                {'error': ' Order cannot be cancelled'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        order.status = 'cancelled'
+        order.save()
+        return Response({'status': 'Order cancelled'})
 
-class OrderItemViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsOwnerOrAdmin]
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+    @action(detail=True, methods=['post'])
+    def process_paument(self, request, pk=None):
+        #Implement payment logic strype, paypal etc
+        pass

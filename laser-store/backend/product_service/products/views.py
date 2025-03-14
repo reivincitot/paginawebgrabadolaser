@@ -3,12 +3,12 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Product, Category, InventoryMovement
 from .serializers import ProductSerializer, CategorySerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsAdminOrReadOnly
-
-
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -68,3 +68,16 @@ class ProductViewSet(viewsets.ModelViewSet):
                 [settings.EMAIL_HOST_USER],
                 fail_silently=False,
             )
+            
+        @action(detail=True, methods=['GET'], url_path='stock')
+        def get_stock(self, request, pk=None):
+            """Endpoint profesional para verificar stock"""
+            product = self.get_object()
+            return Response({
+                'product_id': product.id,
+                'stock': product.stock,
+                'available': product.stock > 0,
+                'minimum_stock': 10,
+                'last_updated': product.updated_at.isoformat()
+            })
+            
