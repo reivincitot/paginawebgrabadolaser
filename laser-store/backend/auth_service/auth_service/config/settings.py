@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'social_django',
     'authentication',
     'drf_spectacular',
@@ -33,6 +34,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -40,6 +42,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.middleware.LoggingMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -130,3 +133,72 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_USER')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '''
+            %(asctine)s %(levelname)s %(name)s %(message)s
+            %(module)s %(pathname)s %(funcname)s %(lineno)d
+            %(process)d %(thread)d %(username)s %(service_name)s
+            ''',
+            'datefmt': '%Y-%m-%dT%H:%:%SZ',
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'loggin.StreamHandler',
+            'formatter':'json',
+        },
+        'file':{
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/auth_service/auth.log',
+            'formatter': 'json',
+            'maxBytes': 1024 * 1024 * 50, #50 MB
+            'backupCount': 5,
+        },
+        'elasticsearch': {
+            'class': 'elasticserach_logging.handlers.ElasticsearchHandler',
+            'host': [os.getenv('ELASTICSEARCH_URL', 'http://elasticsearch:9200')],
+            'index_name': 'auth_service_logs',
+            'buffer_size': 100,
+            'flush_frequency': 1, # Seconds
+        }
+    },
+    'loggers':{
+        'django':{
+            'handlers': ['console', 'file', 'elasticsearch'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+        },
+        'auth': {
+            'handlers': ['console', 'file', 'elasticsearch'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+    }
+} 
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-log-context',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
