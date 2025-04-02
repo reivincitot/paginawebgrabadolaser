@@ -134,6 +134,8 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_USER')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+SERVICE_NAME = os.getenv('SERVICE_NAME', 'auth_service')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -166,7 +168,12 @@ LOGGING = {
             'index_name': 'auth_service_logs',
             'buffer_size': 100,
             'flush_frequency': 1, # Seconds
-        }
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+            'filters': ['context_filter'],
+        },
     },
     'loggers':{
         'django':{
@@ -178,8 +185,13 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         }
-    }
-} 
+    },
+    'filters': {
+        'context_filter': {
+            '()': 'authentication.middleware.RequestContextFilter',
+        }
+    },
+}    
 
 CORS_ALLOW_HEADERS = [
     'accept',
