@@ -1,16 +1,20 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+import environ
 
-load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 
-DEBUG = os.getenv('DEBUG') == 'True'
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='change-me')
 
-ALLOWED_HOSTS = ['*']
+DEBUG = env('DJANGO_DEBUG', default=True)
+
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', default='127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -78,11 +82,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
+        'HOST': env('POSTGRES_HOST'),
+        'PORT': env('POSTGRES_PORT', default='5432'),
     }
 }
 
@@ -214,3 +218,7 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
+CELERY_BROKER_URL = f"redis://{env('REDIS_HOST','redis')}:{env('REDIS_PORT','6379')}/0"
+
+MONGO_URI = env('MONGO_URI', default='mongodb://mongo:27017/logs')
