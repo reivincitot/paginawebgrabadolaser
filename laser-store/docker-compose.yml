@@ -1,0 +1,81 @@
+services:
+  db_products:
+    image: postgres:14
+    env_file:
+      - ./backend/product_service/.env
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - pgdata_products:/var/lib/postgresql/data
+    ports:
+      - "54322:5432"
+
+  product_service:
+    build:
+      context: ./backend/product_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/product_service/.env
+    depends_on:
+      - db_products
+      - mongo
+    volumes:
+      - ./backend/product_service:/app   # sólo si quieres hot-reload en dev
+    ports:
+      - "8002:8000"
+
+  orders_service:
+    build:
+      context: ./backend/orders_service
+      dockerfile: Dockerfile
+    container_name: orders_service
+    env_file:
+      - ./backend/orders_service/.env
+    volumes:
+      - ./backend/orders_service:/app
+    ports:
+      - "8003:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db_products
+
+  client_service:
+    build:
+      context: ./backend/client_service
+      dockerfile: Dockerfile
+    container_name: client_service
+    env_file:
+      - ./backend/client_service/.env
+    volumes:
+      - ./backend/client_service:/app
+    ports:
+      - "8004:8000"
+    depends_on:
+      - db_products
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - product_service
+      - orders_service
+      - client_service
+
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  pgdata_products:
+  mongo_data:

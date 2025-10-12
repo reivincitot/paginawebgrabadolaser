@@ -1,0 +1,9 @@
+Django>=4.2,<5.0
+djangorestframework
+psycopg2-binary
+django-environ
+django-modeltranslation
+drf-yasg
+Pillow
+gunicorn
+pymongo
