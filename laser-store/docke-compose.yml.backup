@@ -43,31 +43,30 @@ services:
 
   client_service:
     build:
-      context: ./backend/client_services
+      context: ./backend/client_service
       dockerfile: Dockerfile
     container_name: client_service
     env_file:
-      - ./backend/client_services/.env
+      - ./backend/client_service/.env
     volumes:
-      - ./backend/client_services:/app
+      - ./backend/client_service:/app
     ports:
       - "8004:8000"
     depends_on:
       - db_products
 
-  # Comentamos frontend porque no tenemos la carpeta
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #   depends_on:
-  #     - product_service
-  #     - orders_service
-  #     - client_service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - product_service
+      - orders_service
+      - client_service
 
   mongo:
     image: mongo:6
