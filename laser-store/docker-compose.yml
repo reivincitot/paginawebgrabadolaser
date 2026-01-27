@@ -22,7 +22,7 @@ services:
       - db_products
       - mongo
     volumes:
-      - ./backend/product_service:/app   # sólo si quieres hot-reload en dev
+      - ./backend/product_service:/app   # solo si quieres hot-reload en dev
     ports:
       - "8002:8000"
 
@@ -55,19 +55,25 @@ services:
     depends_on:
       - db_products
 
-  # Comentamos frontend porque no tenemos la carpeta
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #   depends_on:
-  #     - product_service
-  #     - orders_service
-  #     - client_service
+  frontend:
+    build:
+       context: ./frontend
+       dockerfile: Dockerfile
+    ports:
+       - "3000:80"
+    volumes:
+       - ./frontend:/app
+       - /app/node_modules
+       - /app/dist
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - NODE_ENV=development
+    depends_on:
+       - product_service
+       - orders_service
+       - client_service
+    networks:
+      - backend-network
 
   mongo:
     image: mongo:6
@@ -80,3 +86,7 @@ services:
 volumes:
   pgdata_products:
   mongo_data:
+
+networks:
+  backend-network:
+    driver: bridge

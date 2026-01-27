@@ -1,6 +1,8 @@
-Django>=4.0
-djangorestframework
-psycopg2-binary
-django-cors-headers
-gunicorn
-django-environ
+Django==4.2.11
+djangorestframework==3.14.0
+psycopg2-binary==2.9.9
+django-cors-headers==4.3.1
+gunicorn==21.2.0
+django-environ==0.11.2
+drf-yasg==1.21.7
+django-filter==23.5
