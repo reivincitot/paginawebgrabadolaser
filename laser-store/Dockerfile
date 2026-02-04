@@ -1,9 +1,8 @@
-#frontend/DockerFile
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# copiar archivos de dependencias
+# Copiar archivos de dependencias
 COPY package*.json ./
 COPY vite.config.js ./
 
@@ -11,7 +10,7 @@ COPY vite.config.js ./
 RUN npm ci --silent
 
 # Copiar código fuente
-COPY ..
+COPY . .
 
 # Construir aplicación
 RUN npm run build
@@ -20,7 +19,10 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copiar configuración de nginx
-COPY --from=builder /app/dist /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copiar build desde la etapa anterior
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Exponer puerto
 EXPOSE 80
